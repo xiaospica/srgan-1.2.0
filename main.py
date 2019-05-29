@@ -13,6 +13,8 @@ from model import *
 from utils import *
 from config import config, log_config
 
+from tqdm import tqdm
+
 ###====================== HYPER-PARAMETERS ===========================###
 ## Adam
 batch_size = config.TRAIN.batch_size
@@ -247,7 +249,15 @@ def evaluate():
     # train_lr_img_list = sorted(tl.files.load_file_list(path=config.TRAIN.lr_img_path, regx='.*.png', printable=False))
     #######valid_hr_img_list = sorted(tl.files.load_file_list(path=config.VALID.hr_img_path, regx='.*.png', printable=False))
     valid_lr_img_list = sorted(tl.files.load_file_list(path=config.VALID.lr_img_path, regx='.*.png', printable=False))
-
+    ###sort the list according to the number
+    new_list = []
+    list_num = np.array(valid_lr_img_list).shape[0]
+    for item in range(list_num):
+        file_name = str(item) + '.png'
+        new_list.append(file_name)
+    valid_lr_img_list = new_list
+    print(valid_lr_img_list)
+    
     ## If your machine have enough memory, please pre-load the whole train set.
     # train_hr_imgs = tl.vis.read_images(train_hr_img_list, path=config.TRAIN.hr_img_path, n_threads=32)
     # for im in train_hr_imgs:
@@ -271,7 +281,7 @@ def evaluate():
     tl.layers.initialize_global_variables(sess)
     tl.files.load_and_assign_npz(sess=sess, name=checkpoint_dir + '/g_srgan.npz', network=net_g)
 
-    for imid in range(np.array(valid_lr_imgs).shape[0]):
+    for imid in tqdm(range(np.array(valid_lr_imgs).shape[0])):
         ###========================== DEFINE MODEL ============================###
         # imid = 64  # 0: 企鹅  81: 蝴蝶 53: 鸟  64: 古堡
         valid_lr_img = valid_lr_imgs[imid]
